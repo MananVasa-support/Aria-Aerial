@@ -1234,13 +1234,13 @@
         // Show response sheets panel
         const panel = document.getElementById('sheets-panel');
         const sheetLink = document.getElementById('response-sheet-link');
-        if (sheetLink) sheetLink.href = SHEET_URL.replace('/exec', '/exec?action=view') || SHEET_URL;
+        if (sheetLink) sheetLink.href = 'https://docs.google.com/spreadsheets/d/1p28EbfJxezMIPEVKt82vdzOiT3u11Fw4ShaVj6XtQss/edit?gid=906418594#gid=906418594';
         panel.classList.add('visible');
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 2000);
     } catch(err) {
       showToast('Something went wrong. Please try again.', 'error');
-      btn.disabled=false; btn.textContent='Submit →';
+      btn.disabled=false; btn.textContent='Submit';
     }
   }
 </script>
