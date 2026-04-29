@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aria Aerial – Work Management Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cyan:       #00ACC1;
+    --cyan-dark:  #007C91;
+    --cyan-light: #E0F7FA;
+    --cyan-mid:   #B2EBF2;
+    --yellow:     #FFC107;
+    --red:        #E53935;
+    --white:      #FFFFFF;
+    --grey-light: #F5F5F5;
+    --grey-mid:   #E0E0E0;
+    --grey-text:  #616161;
+    --grey-head:  #9E9E9E;
+    --pending-red:#C62828;
+    --shadow:     0 2px 8px rgba(0,0,0,0.10);
+    --radius:     10px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #F0F9FB;
+    color: #263238;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  .dashboard-header {
+    background: linear-gradient(135deg, var(--cyan-dark) 0%, var(--cyan) 60%, #26C6DA 100%);
+    color: var(--white);
+    padding: 18px 32px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-logo {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .header-title h1 {
+    font-size: 20px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .header-title p {
+    font-size: 11px; opacity: 0.82; letter-spacing: 0.3px; margin-top: 1px;
+  }
+  .header-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .live-badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #69F0AE;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.5;transform:scale(1.3)}
+  }
+  .last-updated { font-size: 11px; opacity: 0.7; }
+
+  /* ── MAIN WRAPPER ─────────────────────── */
+  .main { padding: 22px 28px 40px; }
+
+  /* ── FILTER BAR ───────────────────────── */
+  .filter-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px 22px 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+  }
+  .filter-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    flex-wrap: nowrap;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .filter-group label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--cyan-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .filter-group input[type="date"],
+  .filter-group select {
+    border: 1.5px solid var(--grey-mid);
+    border-radius: 7px;
+    padding: 8px 11px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #263238;
+    background: var(--grey-light);
+    transition: border-color 0.2s;
+    height: 38px;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+  }
+  .filter-group input[type="date"]:focus,
+  .filter-group select:focus {
+    border-color: var(--cyan);
+    background: var(--white);
+  }
+  .employee-select-wrapper { position: relative; flex: 1.6; min-width: 200px; }
+  .employee-select-wrapper label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--cyan-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .custom-multiselect {
+    position: relative;
+  }
+  .multiselect-trigger {
+    border: 1.5px solid var(--grey-mid);
+    border-radius: 7px;
+    padding: 8px 32px 8px 11px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #263238;
+    background: var(--grey-light);
+    height: 38px;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: border-color 0.2s;
+    user-select: none;
+  }
+  .multiselect-trigger:hover { border-color: var(--cyan); }
+  .multiselect-trigger::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--grey-text);
+    font-size: 12px;
+    pointer-events: none;
+  }
+  .multiselect-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: var(--white);
+    border: 1.5px solid var(--grey-mid);
+    border-radius: 7px;
+    z-index: 500;
+    min-width: 200px;
+    max-height: 220px;
+    overflow-y: auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+    padding: 6px 0;
+  }
+  .multiselect-dropdown.open { display: block; }
+  .multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.12s;
+  }
+  .multiselect-option:hover { background: var(--cyan-light); }
+  .multiselect-option input[type="checkbox"] {
+    accent-color: var(--cyan);
+    width: 14px; height: 14px;
+    cursor: pointer;
+  }
+  .multiselect-option.select-all {
+    border-bottom: 1px solid var(--grey-mid);
+    font-weight: 700;
+    color: var(--cyan-dark);
+  }
+  .filter-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+  }
+  .filter-buttons label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    pointer-events: none;
+    user-select: none;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 0;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 18px;
+    height: 38px;
+    border: none;
+    border-radius: 7px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  }
+  .btn-apply {
+    background: var(--red);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(229,57,53,0.3);
+  }
+  .btn-apply:hover { background: #C62828; transform: translateY(-1px); }
+  .btn-apply:active { transform: translateY(0); }
+  .btn-refresh {
+    background: var(--cyan);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(0,172,193,0.3);
+  }
+  .btn-refresh:hover { background: var(--cyan-dark); transform: translateY(-1px); }
+  .btn-refresh svg { width: 14px; height: 14px; }
+
+  /* ── TOGGLE BAR ───────────────────────── */
+  .toggle-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 8px;
+  }
+  .toggle-btn {
+    padding: 9px 26px;
+    border: 2px solid var(--cyan);
+    background: #ECEFF1;
+    color: var(--grey-text);
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.3px;
+  }
+  .toggle-btn:first-child { border-radius: 8px 0 0 8px; }
+  .toggle-btn:last-child  { border-radius: 0 8px 8px 0; border-left: none; }
+  .toggle-btn.active {
+    background: var(--cyan);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(0,172,193,0.25);
+  }
+  .info-text {
+    font-size: 12px;
+    color: var(--grey-text);
+    margin-bottom: 18px;
+    padding-left: 4px;
+  }
+  .info-text strong { color: var(--cyan-dark); }
+
+  /* ── KPI CARDS ────────────────────────── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .kpi-card {
+    background: linear-gradient(140deg, var(--cyan) 0%, var(--cyan-dark) 100%);
+    color: var(--white);
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    box-shadow: 0 3px 12px rgba(0,124,145,0.22);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,124,145,0.3);
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--yellow);
+    color: #263238;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .kpi-icon {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .kpi-value {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--white);
+  }
+  .kpi-sub {
+    font-size: 11px;
+    opacity: 0.78;
+    margin-top: 4px;
+  }
+
+  /* ── SECTION TITLE ────────────────────── */
+  .section-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--white);
+    background: var(--cyan);
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .table-scroll {
+    overflow: auto;
+    max-height: 340px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    min-width: 900px;
+  }
+  thead th {
+    background: var(--cyan);
+    color: var(--white);
+    font-weight: 700;
+    padding: 9px 12px;
+    text-align: center;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-right: 1px solid rgba(255,255,255,0.15);
+  }
+  thead th:first-child { text-align: left; }
+  thead th.pending-header {
+    background: var(--pending-red);
+  }
+  thead th.total-header {
+    background: var(--grey-head);
+  }
+  thead .sub-header th {
+    background: rgba(0,172,193,0.85);
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  thead .sub-header th.pending-sub {
+    background: rgba(198,40,40,0.82);
+  }
+  thead .sub-header th.total-sub {
+    background: rgba(158,158,158,0.85);
+  }
+  tbody tr:nth-child(even) { background: #F9FDFE; }
+  tbody tr:hover { background: var(--cyan-light); }
+  tbody td {
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--grey-mid);
+    border-right: 1px solid #ECEFF1;
+    color: #37474F;
+  }
+  tbody td:first-child { text-align: left; font-weight: 600; color: var(--cyan-dark); }
+  tfoot tr td {
+    background: #ECEFF1;
+    color: #37474F;
+    font-weight: 700;
+    padding: 9px 12px;
+    text-align: center;
+    border-top: 2px solid var(--grey-mid);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+  tfoot tr td:first-child { text-align: left; color: #263238; }
+
+  /* ── CHARTS ROW ───────────────────────── */
+  .chart-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .chart-body {
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  .chart-canvas-wrap {
+    flex: 0 0 300px;
+    height: 280px;
+    position: relative;
+  }
+  .chart-legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+  }
+  .legend-dot {
+    width: 13px; height: 13px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-label { color: #455A64; flex: 1; }
+  .legend-val { font-weight: 700; color: #263238; min-width: 30px; text-align: right; }
+
+  /* ── AGING TABLE SPECIFIC ─────────────── */
+  thead th.aging-warn  { background: #E53935; }
+  thead th.aging-danger{ background: #B71C1C; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 1100px) {
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .filter-row { flex-wrap: wrap; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-body { flex-direction: column; }
+    .chart-canvas-wrap { flex: none; width: 100%; }
+  }
+
+  /* Scrollbar styling */
+  .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-scroll::-webkit-scrollbar-track { background: #F0F9FB; }
+  .table-scroll::-webkit-scrollbar-thumb { background: var(--cyan-mid); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     HEADER
+════════════════════════════════════════ -->
+<header class="dashboard-header">
+  <div class="header-left">
+    <div class="header-logo">✈️</div>
+    <div class="header-title">
+      <h1>ARIA AERIAL – WORK MANAGEMENT DASHBOARD</h1>
+      <p>Website Report · Task Tracking & Performance Overview</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <span class="live-dot"></span> LIVE
+    </div>
+    <div class="last-updated" id="lastUpdated">Updated: —</div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════
+     MAIN
+════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- FILTER BAR -->
+  <div class="filter-card">
+    <div class="filter-row">
+
+      <div class="filter-group">
+        <label>Start Date</label>
+        <input type="date" id="startDate">
+      </div>
+
+      <div class="filter-group">
+        <label>End Date</label>
+        <input type="date" id="endDate">
+      </div>
+
+      <div class="employee-select-wrapper">
+        <label>Employee</label>
+        <div class="custom-multiselect">
+          <div class="multiselect-trigger" id="multiTrigger">All Employees</div>
+          <div class="multiselect-dropdown" id="multiDropdown">
+            <div class="multiselect-option select-all" id="selectAllOption">
+              <input type="checkbox" id="chkAll" checked> All Employees
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-buttons">
+        <label>&nbsp;</label>
+        <div class="btn-row">
+          <button class="btn btn-apply" id="btnApply">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Apply Filter
+          </button>
+          <button class="btn btn-refresh" id="btnRefresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15A9 9 0 1 1 5.64 5.64L1 10"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOGGLE + INFO -->
+  <div class="toggle-bar">
+    <button class="toggle-btn active" id="btnDoer">Task Doer</button>
+    <button class="toggle-btn" id="btnInitiator">Task Initiator</button>
+  </div>
+  <div class="info-text" id="infoText">Showing: All Employees · All Dates · <strong id="infoCount">0</strong> tasks · Source: <strong>Website Report</strong></div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-card">
+      <span class="kpi-label">Total Tasks</span>
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-value" id="kpiTotal">0</div>
+      <div class="kpi-sub">Tasks Assigned</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Not Approved</span>
+      <div class="kpi-icon">⏳</div>
+      <div class="kpi-value" id="kpiNotApproved">0</div>
+      <div class="kpi-sub">Awaiting Approval</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Done</span>
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-value" id="kpiDone">0</div>
+      <div class="kpi-sub">Completed Tasks</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Pending</span>
+      <div class="kpi-icon">🔄</div>
+      <div class="kpi-value" id="kpiPending">0</div>
+      <div class="kpi-sub">In Progress</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Cancelled</span>
+      <div class="kpi-icon">❌</div>
+      <div class="kpi-value" id="kpiCancelled">0</div>
+      <div class="kpi-sub">Cancelled Tasks</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Transferred</span>
+      <div class="kpi-icon">↔️</div>
+      <div class="kpi-value" id="kpiTransferred">0</div>
+      <div class="kpi-sub">Reassigned</div>
+    </div>
+  </div>
+
+  <!-- TASK STATUS BY DOER TABLE -->
+  <div class="table-section" id="taskStatusSection">
+    <div class="section-title" id="taskTableTitle">
+      📊 TASK STATUS – BY DOER
+    </div>
+    <div class="table-scroll">
+      <table id="taskStatusTable">
+        <thead>
+          <tr>
+            <th rowspan="2" style="min-width:140px;">Employee Name</th>
+            <th rowspan="2">Approved</th>
+            <th rowspan="2">Not Approved</th>
+            <th rowspan="2">Done</th>
+            <th rowspan="2">Transferred</th>
+            <th rowspan="2">Cancelled</th>
+            <th colspan="5" class="pending-header">Pending</th>
+            <th rowspan="2" class="total-header">Total</th>
+          </tr>
+          <tr class="sub-header">
+            <th class="pending-sub">Total</th>
+            <th class="pending-sub">Need Help</th>
+            <th class="pending-sub">Follow Up</th>
+            <th class="pending-sub">Initiated</th>
+            <th class="pending-sub">Not Started</th>
+          </tr>
+        </thead>
+        <tbody id="taskStatusBody"></tbody>
+        <tfoot id="taskStatusFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- DONUT CHART 1: TASK STATUS DISTRIBUTION -->
+  <div class="chart-section">
+    <div class="section-title">🍩 TASK STATUS DISTRIBUTION</div>
+    <div class="chart-body">
+      <div class="chart-canvas-wrap">
+        <canvas id="statusDonut"></canvas>
+      </div>
+      <div class="chart-legend" id="statusLegend"></div>
+    </div>
+  </div>
+
+  <!-- PENDING TASKS AGING TABLE -->
+  <div class="table-section">
+    <div class="section-title">⏱️ PENDING TASKS – AGING BY EMPLOYEE</div>
+    <div class="table-scroll">
+      <table id="agingTable">
+        <thead>
+          <tr>
+            <th style="min-width:140px;">Employee</th>
+            <th>0–3 Days</th>
+            <th>4–7 Days</th>
+            <th>8–14 Days</th>
+            <th>15–20 Days</th>
+            <th>21–30 Days</th>
+            <th class="aging-warn">31–45 Days</th>
+            <th class="aging-warn">46–60 Days</th>
+            <th class="aging-danger">60+ Days</th>
+            <th class="total-header">Total</th>
+          </tr>
+        </thead>
+        <tbody id="agingBody"></tbody>
+        <tfoot id="agingFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- DONUT CHART 2: AGING DISTRIBUTION -->
+  <div class="chart-section">
+    <div class="section-title">📅 PENDING TASKS – AGING BY DUE DATE</div>
+    <div class="chart-body">
+      <div class="chart-canvas-wrap">
+        <canvas id="agingDonut"></canvas>
+      </div>
+      <div class="chart-legend" id="agingLegend"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   DATA SOURCE  –  Live from Google Sheet "Website Report"
+   via Apps Script Web App
+══════════════════════════════════════════════════════════════ */
+
+// Deployed Apps Script Web App URL
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyi7ZAwHdg4HoXmkXu_qeG6Azi7olea_4om0xnOzSH1ighf2X1FAL6ZbqkMk1gDX-3y/exec';
+
+const STATUSES = ['Approved','Not Approved','Done','Initiated','Follow Up','Need Help','Not Started','Cancelled','Transferred'];
+const PENDING_STATUSES = ['Initiated','Follow Up','Need Help','Not Started'];
+
+// Employee list is auto-discovered from sheet data after fetch
+let EMPLOYEES = [];
+
+function fmt(d){ return d.toISOString().split('T')[0]; }
+
+// Fetch task records from the Google Sheet via Apps Script web app
+async function fetchData(){
+  if(!WEB_APP_URL || WEB_APP_URL === 'PASTE_YOUR_WEB_APP_URL_HERE'){
+    console.error('WEB_APP_URL is not set. Paste your deployed Apps Script web app URL into the HTML.');
+    return [];
+  }
+  try{
+    const res = await fetch(WEB_APP_URL + '?action=read');
+    const json = await res.json();
+    if(json.result !== 'success'){
+      console.error('Sheet read error:', json.message);
+      return [];
+    }
+    return json.data || [];
+  }catch(err){
+    console.error('Fetch failed:', err);
+    return [];
+  }
+}
+
+let RAW_DATA = [];
+let activeMode = 'doer'; // 'doer' | 'initiator'
+let appliedFilters = { start:'', end:'', employees:[] };
+
+// Chart instances
+let statusChart=null, agingChart=null;
+
+const PASTEL_STATUS = ['#80CBC4','#FFCC80','#A5D6A7','#90CAF9','#CE93D8','#80DEEA','#FFAB91','#F48FB1'];
+const PASTEL_AGING  = ['#B2EBF2','#80DEEA','#A5D6A7','#FFF59D','#FFCC80','#FFAB91','#F48FB1','#EF9A9A'];
+
+/* ── Populate employee dropdown ─────────────────── */
+function buildDropdown(){
+  const dd=document.getElementById('multiDropdown');
+  EMPLOYEES.forEach(emp=>{
+    const opt=document.createElement('div');
+    opt.className='multiselect-option';
+    opt.innerHTML=`<input type="checkbox" value="${emp}" class="emp-chk" checked> ${emp}`;
+    dd.appendChild(opt);
+  });
+}
+
+function getSelectedEmployees(){
+  const checks=[...document.querySelectorAll('.emp-chk')];
+  return checks.filter(c=>c.checked).map(c=>c.value);
+}
+
+function updateTriggerLabel(){
+  const sel=getSelectedEmployees();
+  const trigger=document.getElementById('multiTrigger');
+  if(sel.length===0) trigger.textContent='None selected';
+  else if(sel.length===EMPLOYEES.length) trigger.textContent='All Employees';
+  else if(sel.length===1) trigger.textContent=sel[0];
+  else trigger.textContent=`${sel.length} employees selected`;
+}
+
+/* ── Filter data ────────────────────────────────── */
+function getFilteredData(){
+  const {start,end,employees}=appliedFilters;
+  return RAW_DATA.filter(r=>{
+    const nameField = activeMode==='doer' ? r.doer : r.initiator;
+    if(employees.length && !employees.includes(nameField)) return false;
+    if(start && r.assignDate < start) return false;
+    if(end   && r.assignDate > end)   return false;
+    return true;
+  });
+}
+
+/* ── KPI aggregation ───────────────────────────── */
+function calcKPI(data){
+  const kpi={total:0,notApproved:0,done:0,pending:0,cancelled:0,transferred:0};
+  data.forEach(r=>{
+    kpi.total++;
+    if(r.status==='Not Approved') kpi.notApproved++;
+    if(r.status==='Done') kpi.done++;
+    if(PENDING_STATUSES.includes(r.status)) kpi.pending++;
+    if(r.status==='Cancelled') kpi.cancelled++;
+    if(r.status==='Transferred') kpi.transferred++;
+  });
+  return kpi;
+}
+
+function animateNumber(el,target){
+  const start=parseInt(el.textContent)||0;
+  const diff=target-start;
+  const dur=400;
+  const t0=performance.now();
+  function step(t){
+    const p=Math.min((t-t0)/dur,1);
+    el.textContent=Math.round(start+diff*p);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function updateKPI(data){
+  const k=calcKPI(data);
+  animateNumber(document.getElementById('kpiTotal'),k.total);
+  animateNumber(document.getElementById('kpiNotApproved'),k.notApproved);
+  animateNumber(document.getElementById('kpiDone'),k.done);
+  animateNumber(document.getElementById('kpiPending'),k.pending);
+  animateNumber(document.getElementById('kpiCancelled'),k.cancelled);
+  animateNumber(document.getElementById('kpiTransferred'),k.transferred);
+  document.getElementById('infoCount').textContent=k.total;
+}
+
+/* ── Task Status Table ─────────────────────────── */
+function buildTaskStatusTable(data){
+  const nameField = activeMode==='doer' ? 'doer' : 'initiator';
+  const emp_set = [...new Set(data.map(r=>r[nameField]))].sort();
+
+  const totals={approved:0,notApproved:0,done:0,transferred:0,cancelled:0,
+                pTotal:0,needHelp:0,followUp:0,initiated:0,notStarted:0,grand:0};
+
+  const body=document.getElementById('taskStatusBody');
+  body.innerHTML='';
+
+  emp_set.forEach(emp=>{
+    const rows=data.filter(r=>r[nameField]===emp);
+    const s={
+      approved:  rows.filter(r=>r.status==='Approved').length,
+      notApproved:rows.filter(r=>r.status==='Not Approved').length,
+      done:      rows.filter(r=>r.status==='Done').length,
+      transferred:rows.filter(r=>r.status==='Transferred').length,
+      cancelled: rows.filter(r=>r.status==='Cancelled').length,
+      needHelp:  rows.filter(r=>r.status==='Need Help').length,
+      followUp:  rows.filter(r=>r.status==='Follow Up').length,
+      initiated: rows.filter(r=>r.status==='Initiated').length,
+      notStarted:rows.filter(r=>r.status==='Not Started').length,
+    };
+    s.pTotal=s.needHelp+s.followUp+s.initiated+s.notStarted;
+    s.grand=s.approved+s.notApproved+s.done+s.transferred+s.cancelled+s.pTotal;
+
+    Object.keys(totals).forEach(k=>{ if(k in s) totals[k]+=s[k]; });
+    totals.grand+=s.grand;
+
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${emp}</td>
+      <td>${s.approved}</td>
+      <td>${s.notApproved}</td>
+      <td>${s.done}</td>
+      <td>${s.transferred}</td>
+      <td>${s.cancelled}</td>
+      <td>${s.pTotal}</td>
+      <td>${s.needHelp}</td>
+      <td>${s.followUp}</td>
+      <td>${s.initiated}</td>
+      <td>${s.notStarted}</td>
+      <td><strong>${s.grand}</strong></td>`;
+    body.appendChild(tr);
+  });
+
+  const foot=document.getElementById('taskStatusFoot');
+  foot.innerHTML=`<tr>
+    <td>Totals</td>
+    <td>${totals.approved}</td>
+    <td>${totals.notApproved}</td>
+    <td>${totals.done}</td>
+    <td>${totals.transferred}</td>
+    <td>${totals.cancelled}</td>
+    <td>${totals.pTotal}</td>
+    <td>${totals.needHelp}</td>
+    <td>${totals.followUp}</td>
+    <td>${totals.initiated}</td>
+    <td>${totals.notStarted}</td>
+    <td>${totals.grand}</td>
+  </tr>`;
+
+  // Title update
+  document.getElementById('taskTableTitle').innerHTML =
+    `📊 TASK STATUS – BY ${activeMode==='doer'?'DOER':'INITIATOR'}`;
+}
+
+/* ── Status Donut Chart ────────────────────────── */
+function buildStatusChart(data){
+  const labels=['Not Started','Initiated','Follow Up','Done','Not Approved','Approved','Cancelled','Transferred'];
+  const counts=labels.map(l=>data.filter(r=>r.status===l).length);
+
+  const legend=document.getElementById('statusLegend');
+  legend.innerHTML='';
+  labels.forEach((l,i)=>{
+    legend.innerHTML+=`<div class="legend-item">
+      <span class="legend-dot" style="background:${PASTEL_STATUS[i]}"></span>
+      <span class="legend-label">${l}</span>
+      <span class="legend-val">${counts[i]}</span>
+    </div>`;
+  });
+
+  if(statusChart) statusChart.destroy();
+  statusChart=new Chart(document.getElementById('statusDonut'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:counts,backgroundColor:PASTEL_STATUS,borderWidth:2,borderColor:'#fff',hoverOffset:8}]},
+    options:{
+      cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}`}}},
+      animation:{animateRotate:true,duration:600}
+    }
+  });
+}
+
+/* ── Aging helpers ──────────────────────────────── */
+const AGING_BANDS=[
+  {label:'0–3 Days',  min:0,  max:3},
+  {label:'4–7 Days',  min:4,  max:7},
+  {label:'8–14 Days', min:8,  max:14},
+  {label:'15–20 Days',min:15, max:20},
+  {label:'21–30 Days',min:21, max:30},
+  {label:'31–45 Days',min:31, max:45},
+  {label:'46–60 Days',min:46, max:60},
+  {label:'60+ Days',  min:61, max:99999},
+];
+
+function agingDays(dueDate){
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  const due=new Date(dueDate);
+  return Math.floor((today-due)/(1000*60*60*24));
+}
+
+function buildAgingTable(data){
+  const pending=data.filter(r=>PENDING_STATUSES.includes(r.status));
+  const nameField = activeMode==='doer' ? 'doer' : 'initiator';
+  const emp_set=[...new Set(pending.map(r=>r[nameField]))].sort();
+
+  const body=document.getElementById('agingBody');
+  body.innerHTML='';
+  const bandTotals=AGING_BANDS.map(()=>0);
+  let grandTotal=0;
+
+  emp_set.forEach(emp=>{
+    const empRows=pending.filter(r=>r[nameField]===emp);
+    const bands=AGING_BANDS.map(b=>empRows.filter(r=>{
+      const d=agingDays(r.dueDate);
+      return d>=b.min && d<=b.max;
+    }).length);
+    const rowTotal=bands.reduce((a,b)=>a+b,0);
+    bands.forEach((v,i)=>bandTotals[i]+=v);
+    grandTotal+=rowTotal;
+
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${emp}</td>${bands.map(v=>`<td>${v}</td>`).join('')}<td><strong>${rowTotal}</strong></td>`;
+    body.appendChild(tr);
+  });
+
+  const foot=document.getElementById('agingFoot');
+  foot.innerHTML=`<tr>
+    <td>Totals</td>
+    ${bandTotals.map(v=>`<td>${v}</td>`).join('')}
+    <td>${grandTotal}</td>
+  </tr>`;
+
+  return {labels:AGING_BANDS.map(b=>b.label), counts:bandTotals};
+}
+
+/* ── Aging Donut Chart ─────────────────────────── */
+function buildAgingChart(labels,counts){
+  const legend=document.getElementById('agingLegend');
+  legend.innerHTML='';
+  labels.forEach((l,i)=>{
+    legend.innerHTML+=`<div class="legend-item">
+      <span class="legend-dot" style="background:${PASTEL_AGING[i]}"></span>
+      <span class="legend-label">${l}</span>
+      <span class="legend-val">${counts[i]}</span>
+    </div>`;
+  });
+
+  if(agingChart) agingChart.destroy();
+  agingChart=new Chart(document.getElementById('agingDonut'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:counts,backgroundColor:PASTEL_AGING,borderWidth:2,borderColor:'#fff',hoverOffset:8}]},
+    options:{
+      cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}`}}},
+      animation:{animateRotate:true,duration:600}
+    }
+  });
+}
+
+/* ── Info text ──────────────────────────────────── */
+function updateInfoText(data){
+  const {start,end,employees}=appliedFilters;
+  const empText=employees.length===0||employees.length===EMPLOYEES.length?'All Employees':`${employees.length} Employees`;
+  const dateText=(start||end)?(start?start:'…')+' → '+(end?end:'…'):'All Dates';
+  document.getElementById('infoText').innerHTML=
+    `Showing: <strong>${empText}</strong> · <strong>${dateText}</strong> · <strong id="infoCount">${data.length}</strong> tasks · Source: <strong>Website Report</strong>`;
+}
+
+/* ── Master render ──────────────────────────────── */
+function render(){
+  const data=getFilteredData();
+  updateKPI(data);
+  buildTaskStatusTable(data);
+  buildStatusChart(data);
+  const {labels,counts}=buildAgingTable(data);
+  buildAgingChart(labels,counts);
+  updateInfoText(data);
+  document.getElementById('lastUpdated').textContent='Updated: '+new Date().toLocaleTimeString();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+══════════════════════════════════════════════════════════════ */
+
+// Multiselect toggle
+document.getElementById('multiTrigger').addEventListener('click', e=>{
+  e.stopPropagation();
+  document.getElementById('multiDropdown').classList.toggle('open');
+});
+document.addEventListener('click', ()=>{
+  document.getElementById('multiDropdown').classList.remove('open');
+});
+document.getElementById('multiDropdown').addEventListener('click', e=>e.stopPropagation());
+
+// Select all checkbox
+document.getElementById('chkAll').addEventListener('change', function(){
+  document.querySelectorAll('.emp-chk').forEach(c=>c.checked=this.checked);
+  updateTriggerLabel();
+});
+
+// Individual checkboxes (delegated after build)
+document.getElementById('multiDropdown').addEventListener('change', function(e){
+  if(e.target.classList.contains('emp-chk')){
+    const all=document.querySelectorAll('.emp-chk');
+    const checked=[...all].filter(c=>c.checked);
+    document.getElementById('chkAll').checked=checked.length===all.length;
+    updateTriggerLabel();
+  }
+});
+
+// Toggle buttons
+document.getElementById('btnDoer').addEventListener('click',()=>{
+  activeMode='doer';
+  document.getElementById('btnDoer').classList.add('active');
+  document.getElementById('btnInitiator').classList.remove('active');
+  render();
+});
+document.getElementById('btnInitiator').addEventListener('click',()=>{
+  activeMode='initiator';
+  document.getElementById('btnInitiator').classList.add('active');
+  document.getElementById('btnDoer').classList.remove('active');
+  render();
+});
+
+// Apply filter
+document.getElementById('btnApply').addEventListener('click',()=>{
+  appliedFilters={
+    start: document.getElementById('startDate').value,
+    end:   document.getElementById('endDate').value,
+    employees: getSelectedEmployees().length===EMPLOYEES.length?[]:getSelectedEmployees()
+  };
+  render();
+});
+
+// Refresh — re-fetch from sheet AND clear filters
+document.getElementById('btnRefresh').addEventListener('click', async ()=>{
+  document.getElementById('startDate').value='';
+  document.getElementById('endDate').value='';
+  appliedFilters={start:'',end:'',employees:[]};
+  RAW_DATA = await fetchData();
+  rebuildEmployeeList();
+  render();
+});
+
+/* ── Rebuild employee dropdown from current RAW_DATA ───── */
+function rebuildEmployeeList(){
+  const set = new Set();
+  RAW_DATA.forEach(r=>{
+    if(r.doer) set.add(r.doer);
+    if(r.initiator) set.add(r.initiator);
+  });
+  EMPLOYEES = [...set].sort();
+
+  // Rebuild dropdown
+  const dd = document.getElementById('multiDropdown');
+  // Keep the "Select All" option (first child), clear the rest
+  const selectAll = dd.querySelector('.select-all');
+  dd.innerHTML = '';
+  if(selectAll) dd.appendChild(selectAll);
+  EMPLOYEES.forEach(emp=>{
+    const opt=document.createElement('div');
+    opt.className='multiselect-option';
+    opt.innerHTML=`<input type="checkbox" value="${emp}" class="emp-chk" checked> ${emp}`;
+    dd.appendChild(opt);
+  });
+  document.getElementById('chkAll').checked = true;
+  updateTriggerLabel();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUTO-REFRESH  – re-fetches live data from Google Sheet every 60s
+══════════════════════════════════════════════════════════════ */
+async function refreshFromSheet(){
+  RAW_DATA = await fetchData();
+  rebuildEmployeeList();
+  render();
+}
+setInterval(refreshFromSheet, 60000);
+
+/* ══════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════ */
+(async function init(){
+  RAW_DATA = await fetchData();
+  rebuildEmployeeList();
+  render();
+})();
+</script>
+</body>
+</html>
