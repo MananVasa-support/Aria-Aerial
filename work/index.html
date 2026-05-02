@@ -58,11 +58,33 @@
   .header-title h1 {
     font-size: 20px; font-weight: 700; letter-spacing: 0.5px;
   }
+  .header-tag {
+    display: inline-block;
+    margin-top: 6px;
+    background: var(--red);
+    color: #FFFFFF;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+  }
   .header-title p {
     font-size: 11px; opacity: 0.82; letter-spacing: 0.3px; margin-top: 1px;
   }
   .header-right {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header-brand-logo {
+    height: 52px;
+    width: auto;
+    background: var(--white);
+    border-radius: 10px;
+    padding: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    display: block;
   }
   .live-badge {
     background: rgba(255,255,255,0.18);
@@ -311,11 +333,15 @@
     background: linear-gradient(140deg, var(--cyan) 0%, var(--cyan-dark) 100%);
     color: var(--white);
     border-radius: 12px;
-    padding: 16px 16px 14px;
+    padding: 16px 56px 16px 16px;  /* right-pad reserves space for the icon */
     box-shadow: 0 3px 12px rgba(0,124,145,0.22);
     position: relative;
     overflow: hidden;
     transition: transform 0.18s, box-shadow 0.18s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 118px;
   }
   .kpi-card:hover {
     transform: translateY(-3px);
@@ -336,10 +362,15 @@
     letter-spacing: 0.5px;
     background: var(--yellow);
     color: #263238;
-    display: inline-block;
-    padding: 2px 8px;
+    align-self: flex-start;
+    padding: 3px 9px;
     border-radius: 4px;
     margin-bottom: 10px;
+    line-height: 1.3;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .kpi-icon {
     position: absolute;
@@ -356,11 +387,16 @@
     font-weight: 700;
     line-height: 1;
     color: var(--white);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.3px;
+    margin-top: auto;
   }
   .kpi-sub {
     font-size: 11px;
-    opacity: 0.78;
-    margin-top: 4px;
+    opacity: 0.82;
+    margin-top: 5px;
+    letter-spacing: 0.2px;
+    line-height: 1.3;
   }
 
   /* ── SECTION TITLE ────────────────────── */
@@ -370,12 +406,15 @@
     text-transform: uppercase;
     letter-spacing: 0.6px;
     color: var(--white);
-    background: var(--cyan);
-    padding: 10px 18px;
+    background: linear-gradient(140deg, var(--cyan) 0%, var(--cyan-dark) 100%);
+    padding: 12px 20px;
     border-radius: 8px 8px 0 0;
+    border-bottom: 3px solid var(--yellow);
     display: flex;
     align-items: center;
     gap: 8px;
+    line-height: 1.2;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.12);
   }
 
   /* ── TABLES ───────────────────────────── */
@@ -407,13 +446,16 @@
     top: 0;
     z-index: 10;
     border-right: 1px solid rgba(255,255,255,0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
   thead th:first-child { text-align: left; }
   thead th.pending-header {
     background: var(--pending-red);
   }
   thead th.total-header {
-    background: var(--grey-head);
+    background: #000000;
+    color: #FFFFFF;
   }
   thead .sub-header th {
     background: rgba(0,172,193,0.85);
@@ -424,7 +466,8 @@
     background: rgba(198,40,40,0.82);
   }
   thead .sub-header th.total-sub {
-    background: rgba(158,158,158,0.85);
+    background: #000000;
+    color: #FFFFFF;
   }
   tbody tr:nth-child(even) { background: #F9FDFE; }
   tbody tr:hover { background: var(--cyan-light); }
@@ -437,8 +480,8 @@
   }
   tbody td:first-child { text-align: left; font-weight: 600; color: var(--cyan-dark); }
   tfoot tr td {
-    background: #ECEFF1;
-    color: #37474F;
+    background: #000000;
+    color: #FFFFFF;
     font-weight: 700;
     padding: 9px 12px;
     text-align: center;
@@ -447,7 +490,11 @@
     bottom: 0;
     z-index: 10;
   }
-  tfoot tr td:first-child { text-align: left; color: #263238; }
+  tfoot tr td:first-child { text-align: left; color: #FFFFFF; }
+  tfoot tr td strong { color: #FFFFFF; }
+
+  /* Hide-utility for sections that disappear in Initiator mode */
+  .is-hidden { display: none !important; }
 
   /* ── CHARTS ROW ───────────────────────── */
   .chart-section {
@@ -516,10 +563,9 @@
 ════════════════════════════════════════ -->
 <header class="dashboard-header">
   <div class="header-left">
-    <div class="header-logo">✈️</div>
     <div class="header-title">
       <h1>ARIA AERIAL – WORK MANAGEMENT DASHBOARD</h1>
-      <p>Website Report · Task Tracking & Performance Overview</p>
+      <span class="header-tag">BY ALTUS CORP</span>
     </div>
   </div>
   <div class="header-right">
@@ -527,6 +573,7 @@
       <span class="live-dot"></span> LIVE
     </div>
     <div class="last-updated" id="lastUpdated">Updated: —</div>
+    <img class="header-brand-logo" alt="Aria Aerial Logo" src="data:image/jpeg;base64,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">
   </div>
 </header>
 
@@ -593,10 +640,10 @@
   <!-- KPI CARDS -->
   <div class="kpi-row" id="kpiRow">
     <div class="kpi-card">
-      <span class="kpi-label">Total Tasks</span>
+      <span class="kpi-label" id="kpiTotalLabel">Total Assigned</span>
       <div class="kpi-icon">📋</div>
       <div class="kpi-value" id="kpiTotal">0</div>
-      <div class="kpi-sub">Tasks Assigned</div>
+      <div class="kpi-sub" id="kpiTotalSub">Tasks Assigned</div>
     </div>
     <div class="kpi-card">
       <span class="kpi-label">Not Approved</span>
@@ -637,25 +684,7 @@
     </div>
     <div class="table-scroll">
       <table id="taskStatusTable">
-        <thead>
-          <tr>
-            <th rowspan="2" style="min-width:140px;">Employee Name</th>
-            <th rowspan="2">Approved</th>
-            <th rowspan="2">Not Approved</th>
-            <th rowspan="2">Done</th>
-            <th rowspan="2">Transferred</th>
-            <th rowspan="2">Cancelled</th>
-            <th colspan="5" class="pending-header">Pending</th>
-            <th rowspan="2" class="total-header">Total</th>
-          </tr>
-          <tr class="sub-header">
-            <th class="pending-sub">Total</th>
-            <th class="pending-sub">Need Help</th>
-            <th class="pending-sub">Follow Up</th>
-            <th class="pending-sub">Initiated</th>
-            <th class="pending-sub">Not Started</th>
-          </tr>
-        </thead>
+        <thead id="taskStatusHead"></thead>
         <tbody id="taskStatusBody"></tbody>
         <tfoot id="taskStatusFoot"></tfoot>
       </table>
@@ -674,7 +703,7 @@
   </div>
 
   <!-- PENDING TASKS AGING TABLE -->
-  <div class="table-section">
+  <div class="table-section" id="agingTableSection">
     <div class="section-title">⏱️ PENDING TASKS – AGING BY EMPLOYEE</div>
     <div class="table-scroll">
       <table id="agingTable">
@@ -699,7 +728,7 @@
   </div>
 
   <!-- DONUT CHART 2: AGING DISTRIBUTION -->
-  <div class="chart-section">
+  <div class="chart-section" id="agingChartSection">
     <div class="section-title">📅 PENDING TASKS – AGING BY DUE DATE</div>
     <div class="chart-body">
       <div class="chart-canvas-wrap">
@@ -713,43 +742,19 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   DATA SOURCE  –  Live from Google Sheet "Website Report"
-   via Apps Script Web App
+   DATA SOURCE  –  Live Google Sheet via Apps Script
+   ───────────────────────────────────────────────────────────────
+   PASTE YOUR DEPLOYED WEB-APP URL BELOW.  It looks like:
+   https://script.google.com/macros/s/AKfycbx.../exec
 ══════════════════════════════════════════════════════════════ */
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyi7ZAwHdg4HoXmkXu_qeG6Azi7olea_4om0xnOzSH1ighf2X1FAL6ZbqkMk1gDX-3y/exec";
 
-// Deployed Apps Script Web App URL
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyi7ZAwHdg4HoXmkXu_qeG6Azi7olea_4om0xnOzSH1ighf2X1FAL6ZbqkMk1gDX-3y/exec';
-
+let EMPLOYEES = [];                       // populated from server
 const STATUSES = ['Approved','Not Approved','Done','Initiated','Follow Up','Need Help','Not Started','Cancelled','Transferred'];
 const PENDING_STATUSES = ['Initiated','Follow Up','Need Help','Not Started'];
 
-// Employee list is auto-discovered from sheet data after fetch
-let EMPLOYEES = [];
-
-function fmt(d){ return d.toISOString().split('T')[0]; }
-
-// Fetch task records from the Google Sheet via Apps Script web app
-async function fetchData(){
-  if(!WEB_APP_URL || WEB_APP_URL === 'PASTE_YOUR_WEB_APP_URL_HERE'){
-    console.error('WEB_APP_URL is not set. Paste your deployed Apps Script web app URL into the HTML.');
-    return [];
-  }
-  try{
-    const res = await fetch(WEB_APP_URL + '?action=read');
-    const json = await res.json();
-    if(json.result !== 'success'){
-      console.error('Sheet read error:', json.message);
-      return [];
-    }
-    return json.data || [];
-  }catch(err){
-    console.error('Fetch failed:', err);
-    return [];
-  }
-}
-
 let RAW_DATA = [];
-let activeMode = 'doer'; // 'doer' | 'initiator'
+let activeMode = 'doer';                  // 'doer' | 'initiator'
 let appliedFilters = { start:'', end:'', employees:[] };
 
 // Chart instances
@@ -831,12 +836,65 @@ function updateKPI(data){
   animateNumber(document.getElementById('kpiCancelled'),k.cancelled);
   animateNumber(document.getElementById('kpiTransferred'),k.transferred);
   document.getElementById('infoCount').textContent=k.total;
+
+  // Dynamic Total Tasks KPI label based on active mode
+  const totalLabel = document.getElementById('kpiTotalLabel');
+  const totalSub   = document.getElementById('kpiTotalSub');
+  if(activeMode === 'doer'){
+    totalLabel.textContent = 'Total Assigned';
+    totalSub.textContent   = 'Tasks Assigned';
+  } else {
+    totalLabel.textContent = 'Total Initiated';
+    totalSub.textContent   = 'Tasks Initiated';
+  }
 }
 
 /* ── Task Status Table ─────────────────────────── */
 function buildTaskStatusTable(data){
   const nameField = activeMode==='doer' ? 'doer' : 'initiator';
   const emp_set = [...new Set(data.map(r=>r[nameField]))].sort();
+
+  /* Build thead dynamically based on mode */
+  const head = document.getElementById('taskStatusHead');
+  if(activeMode === 'doer'){
+    head.innerHTML = `
+      <tr>
+        <th rowspan="2" style="min-width:140px;">Employee Name</th>
+        <th rowspan="2">Approved</th>
+        <th rowspan="2">Not Approved</th>
+        <th rowspan="2">Done</th>
+        <th rowspan="2">Transferred</th>
+        <th rowspan="2">Cancelled</th>
+        <th colspan="5" class="pending-header">Pending</th>
+        <th rowspan="2" class="total-header">Total</th>
+      </tr>
+      <tr class="sub-header">
+        <th class="pending-sub">Total</th>
+        <th class="pending-sub">Need Help</th>
+        <th class="pending-sub">Follow Up</th>
+        <th class="pending-sub">Initiated</th>
+        <th class="pending-sub">Not Started</th>
+      </tr>`;
+  } else {
+    head.innerHTML = `
+      <tr>
+        <th rowspan="2" style="min-width:140px;">Initiator</th>
+        <th rowspan="2">Task Initiated</th>
+        <th rowspan="2">Approved</th>
+        <th rowspan="2">Not Approved</th>
+        <th rowspan="2">Done</th>
+        <th rowspan="2">Transferred</th>
+        <th rowspan="2">Cancelled</th>
+        <th colspan="5" class="pending-header">Pending</th>
+      </tr>
+      <tr class="sub-header">
+        <th class="pending-sub">Total</th>
+        <th class="pending-sub">Need Help</th>
+        <th class="pending-sub">Follow Up</th>
+        <th class="pending-sub">Initiated</th>
+        <th class="pending-sub">Not Started</th>
+      </tr>`;
+  }
 
   const totals={approved:0,notApproved:0,done:0,transferred:0,cancelled:0,
                 pTotal:0,needHelp:0,followUp:0,initiated:0,notStarted:0,grand:0};
@@ -858,43 +916,80 @@ function buildTaskStatusTable(data){
       notStarted:rows.filter(r=>r.status==='Not Started').length,
     };
     s.pTotal=s.needHelp+s.followUp+s.initiated+s.notStarted;
-    s.grand=s.approved+s.notApproved+s.done+s.transferred+s.cancelled+s.pTotal;
+    // Grand total = actual row count for this employee (so it matches the
+    // KPI "Total Assigned/Initiated" exactly, even if a row has a status
+    // that's not in the recognised list above).
+    s.grand=rows.length;
 
-    Object.keys(totals).forEach(k=>{ if(k in s) totals[k]+=s[k]; });
+    Object.keys(totals).forEach(k=>{ if(k in s && k!=='grand') totals[k]+=s[k]; });
     totals.grand+=s.grand;
 
     const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${emp}</td>
-      <td>${s.approved}</td>
-      <td>${s.notApproved}</td>
-      <td>${s.done}</td>
-      <td>${s.transferred}</td>
-      <td>${s.cancelled}</td>
-      <td>${s.pTotal}</td>
-      <td>${s.needHelp}</td>
-      <td>${s.followUp}</td>
-      <td>${s.initiated}</td>
-      <td>${s.notStarted}</td>
-      <td><strong>${s.grand}</strong></td>`;
+    if(activeMode === 'doer'){
+      tr.innerHTML=`
+        <td>${emp}</td>
+        <td>${s.approved}</td>
+        <td>${s.notApproved}</td>
+        <td>${s.done}</td>
+        <td>${s.transferred}</td>
+        <td>${s.cancelled}</td>
+        <td>${s.pTotal}</td>
+        <td>${s.needHelp}</td>
+        <td>${s.followUp}</td>
+        <td>${s.initiated}</td>
+        <td>${s.notStarted}</td>
+        <td><strong>${s.grand}</strong></td>`;
+    } else {
+      // Initiator mode: Task Initiated column right after name; no grand total column
+      tr.innerHTML=`
+        <td>${emp}</td>
+        <td><strong>${s.grand}</strong></td>
+        <td>${s.approved}</td>
+        <td>${s.notApproved}</td>
+        <td>${s.done}</td>
+        <td>${s.transferred}</td>
+        <td>${s.cancelled}</td>
+        <td>${s.pTotal}</td>
+        <td>${s.needHelp}</td>
+        <td>${s.followUp}</td>
+        <td>${s.initiated}</td>
+        <td>${s.notStarted}</td>`;
+    }
     body.appendChild(tr);
   });
 
   const foot=document.getElementById('taskStatusFoot');
-  foot.innerHTML=`<tr>
-    <td>Totals</td>
-    <td>${totals.approved}</td>
-    <td>${totals.notApproved}</td>
-    <td>${totals.done}</td>
-    <td>${totals.transferred}</td>
-    <td>${totals.cancelled}</td>
-    <td>${totals.pTotal}</td>
-    <td>${totals.needHelp}</td>
-    <td>${totals.followUp}</td>
-    <td>${totals.initiated}</td>
-    <td>${totals.notStarted}</td>
-    <td>${totals.grand}</td>
-  </tr>`;
+  if(activeMode === 'doer'){
+    foot.innerHTML=`<tr>
+      <td>Totals</td>
+      <td>${totals.approved}</td>
+      <td>${totals.notApproved}</td>
+      <td>${totals.done}</td>
+      <td>${totals.transferred}</td>
+      <td>${totals.cancelled}</td>
+      <td>${totals.pTotal}</td>
+      <td>${totals.needHelp}</td>
+      <td>${totals.followUp}</td>
+      <td>${totals.initiated}</td>
+      <td>${totals.notStarted}</td>
+      <td>${totals.grand}</td>
+    </tr>`;
+  } else {
+    foot.innerHTML=`<tr>
+      <td>Totals</td>
+      <td>${totals.grand}</td>
+      <td>${totals.approved}</td>
+      <td>${totals.notApproved}</td>
+      <td>${totals.done}</td>
+      <td>${totals.transferred}</td>
+      <td>${totals.cancelled}</td>
+      <td>${totals.pTotal}</td>
+      <td>${totals.needHelp}</td>
+      <td>${totals.followUp}</td>
+      <td>${totals.initiated}</td>
+      <td>${totals.notStarted}</td>
+    </tr>`;
+  }
 
   // Title update
   document.getElementById('taskTableTitle').innerHTML =
@@ -941,10 +1036,17 @@ const AGING_BANDS=[
 ];
 
 function agingDays(dueDate){
+  // Use today's actual date (was hardcoded to 2025-04-29, which broke aging
+  // for all 2026 due dates → negative days → no band match → empty table).
   const today=new Date();
   today.setHours(0,0,0,0);
   const due=new Date(dueDate);
-  return Math.floor((today-due)/(1000*60*60*24));
+  if(isNaN(due)) return 0;                       // bad/empty due date → bucket 0
+  due.setHours(0,0,0,0);
+  const days=Math.floor((today-due)/(1000*60*60*24));
+  // Future-due pending tasks (negative days) → clamp to 0 so they still show
+  // up in the 0–3 bucket. This guarantees every pending task is visible.
+  return Math.max(0, days);
 }
 
 function buildAgingTable(data){
@@ -1021,8 +1123,21 @@ function render(){
   updateKPI(data);
   buildTaskStatusTable(data);
   buildStatusChart(data);
-  const {labels,counts}=buildAgingTable(data);
-  buildAgingChart(labels,counts);
+
+  const agingTableSection = document.getElementById('agingTableSection');
+  const agingChartSection = document.getElementById('agingChartSection');
+
+  if(activeMode === 'doer'){
+    agingTableSection.classList.remove('is-hidden');
+    agingChartSection.classList.remove('is-hidden');
+    const {labels,counts}=buildAgingTable(data);
+    buildAgingChart(labels,counts);
+  } else {
+    // Initiator mode: aging table & aging chart are not shown
+    agingTableSection.classList.add('is-hidden');
+    agingChartSection.classList.add('is-hidden');
+  }
+
   updateInfoText(data);
   document.getElementById('lastUpdated').textContent='Updated: '+new Date().toLocaleTimeString();
 }
@@ -1081,59 +1196,100 @@ document.getElementById('btnApply').addEventListener('click',()=>{
   render();
 });
 
-// Refresh — re-fetch from sheet AND clear filters
-document.getElementById('btnRefresh').addEventListener('click', async ()=>{
+// Refresh
+document.getElementById('btnRefresh').addEventListener('click',()=>{
   document.getElementById('startDate').value='';
   document.getElementById('endDate').value='';
+  document.querySelectorAll('.emp-chk').forEach(c=>c.checked=true);
+  document.getElementById('chkAll').checked=true;
+  updateTriggerLabel();
   appliedFilters={start:'',end:'',employees:[]};
-  RAW_DATA = await fetchData();
-  rebuildEmployeeList();
   render();
 });
 
-/* ── Rebuild employee dropdown from current RAW_DATA ───── */
-function rebuildEmployeeList(){
-  const set = new Set();
-  RAW_DATA.forEach(r=>{
-    if(r.doer) set.add(r.doer);
-    if(r.initiator) set.add(r.initiator);
-  });
-  EMPLOYEES = [...set].sort();
+/* ══════════════════════════════════════════════════════════════
+   APPS SCRIPT FETCH HELPER
+══════════════════════════════════════════════════════════════ */
+async function fetchSheetData(){
+  if (!WEBAPP_URL || WEBAPP_URL.indexOf('PASTE_') === 0) {
+    throw new Error('WEBAPP_URL is not set. Open this file and paste your deployed Apps Script web-app URL at the top of the <script> block.');
+  }
+  // cache-buster so refreshes always hit the live sheet
+  const url = WEBAPP_URL + '?action=read&t=' + Date.now();
+  const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const json = await res.json();
+  if (json.result !== 'success') {
+    throw new Error(json.message || 'Apps Script returned an error');
+  }
+  return {
+    rows:        json.data       || [],
+    employees:   json.employees  || [],
+    generatedAt: json.generatedAt
+  };
+}
 
-  // Rebuild dropdown
+function rebuildDropdown(){
   const dd = document.getElementById('multiDropdown');
-  // Keep the "Select All" option (first child), clear the rest
-  const selectAll = dd.querySelector('.select-all');
+  // Keep the "(Select All)" row (always the first child) and clear the rest
+  const selectAll = dd.firstElementChild;
   dd.innerHTML = '';
-  if(selectAll) dd.appendChild(selectAll);
-  EMPLOYEES.forEach(emp=>{
-    const opt=document.createElement('div');
-    opt.className='multiselect-option';
-    opt.innerHTML=`<input type="checkbox" value="${emp}" class="emp-chk" checked> ${emp}`;
+  if (selectAll) dd.appendChild(selectAll);
+  EMPLOYEES.forEach(emp => {
+    const opt = document.createElement('div');
+    opt.className = 'multiselect-option';
+    opt.innerHTML = `<input type="checkbox" value="${emp}" class="emp-chk" checked> ${emp}`;
     dd.appendChild(opt);
   });
-  document.getElementById('chkAll').checked = true;
   updateTriggerLabel();
 }
 
-/* ══════════════════════════════════════════════════════════════
-   AUTO-REFRESH  – re-fetches live data from Google Sheet every 60s
-══════════════════════════════════════════════════════════════ */
-async function refreshFromSheet(){
-  RAW_DATA = await fetchData();
-  rebuildEmployeeList();
-  render();
+function showLoadError(msg){
+  const info = document.getElementById('infoText');
+  if (info) info.innerHTML =
+    '<span style="color:#C62828;font-weight:600;">⚠ Could not load data: ' + msg + '</span>';
 }
-setInterval(refreshFromSheet, 60000);
 
 /* ══════════════════════════════════════════════════════════════
-   INIT
+   AUTO-REFRESH  –  pulls fresh data from the sheet every 30 seconds
 ══════════════════════════════════════════════════════════════ */
-(async function init(){
-  RAW_DATA = await fetchData();
-  rebuildEmployeeList();
-  render();
-})();
+async function refreshFromSheet(){
+  try {
+    const payload = await fetchSheetData();
+    RAW_DATA = payload.rows;
+    if (JSON.stringify(payload.employees) !== JSON.stringify(EMPLOYEES)) {
+      EMPLOYEES = payload.employees;
+      rebuildDropdown();
+    }
+    render();
+  } catch (err) {
+    console.error('refreshFromSheet failed:', err);
+  }
+}
+setInterval(refreshFromSheet, 30000);
+
+/* ══════════════════════════════════════════════════════════════
+   INIT  –  initial load from the Google Sheet
+══════════════════════════════════════════════════════════════ */
+async function initialLoad(){
+  try {
+    const payload = await fetchSheetData();
+    EMPLOYEES = payload.employees;
+    RAW_DATA  = payload.rows;
+    console.log('[Dashboard] Loaded ' + RAW_DATA.length + ' rows, ' + EMPLOYEES.length + ' employees:', EMPLOYEES);
+    rebuildDropdown();
+    render();
+  } catch (err) {
+    console.error('[Dashboard] initialLoad failed:', err);
+    // Render first (with empty data), THEN show the error — otherwise
+    // updateInfoText() inside render() overwrites the error message.
+    rebuildDropdown();
+    render();
+    showLoadError(err.message || err);
+  }
+}
+
+initialLoad();
 </script>
 </body>
 </html>
