@@ -1260,17 +1260,19 @@
   }
 
   document.addEventListener("DOMContentLoaded", function() {
-    var initiatorEl = document.getElementById("aw-initiator");
-    var doerEl      = document.getElementById("aw-doer");
-    var subjectEl   = document.getElementById("aw-subject");
-
+var nameEl      = document.getElementById("f-name");
+var initiatorEl = document.getElementById("aw-initiator");
+var doerEl      = document.getElementById("aw-doer");
+var subjectEl   = document.getElementById("aw-subject");
+   
     fetch(NAMES_SCRIPT_URL + "?action=readNames")
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (data.result === "success") {
-          if (data.names.length)    populateDropdown(initiatorEl, data.names,    "Select Initiator");
-          if (data.names.length)    populateDropdown(doerEl,      data.names,    "Select Doer");
-          if (data.subjects.length) populateDropdown(subjectEl,   data.subjects, "Select Subject");
+if (data.names.length)    populateDropdown(nameEl,      data.names,    "Select");
+if (data.names.length)    populateDropdown(initiatorEl, data.names,    "Select Initiator");
+if (data.names.length)    populateDropdown(doerEl,      data.names,    "Select Doer");
+if (data.subjects.length) populateDropdown(subjectEl,   data.subjects, "Select Subject");
         }
       })
       .catch(function(err) {
