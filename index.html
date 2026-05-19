@@ -1246,10 +1246,10 @@
   }
 </script>
 <script>
-  // ── Dynamic dropdown loader for assign-work section ────────────
-  var NAMES_SCRIPT_URL ="https://script.google.com/macros/s/AKfycbyi7ZAwHdg4HoXmkXu_qeG6Azi7olea_4om0xnOzSH1ighf2X1FAL6ZbqkMk1gDX-3y/exec";
+  var NAMES_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyi7ZAwHdg4HoXmkXu_qeG6Azi7olea_4om0xnOzSH1ighf2X1FAL6ZbqkMk1gDX-3y/exec";
 
   function populateDropdown(selectEl, values, placeholder) {
+    if (!selectEl) return;
     selectEl.innerHTML = '<option value="">— ' + placeholder + ' —</option>';
     values.forEach(function(val) {
       var opt = document.createElement("option");
@@ -1260,24 +1260,22 @@
   }
 
   document.addEventListener("DOMContentLoaded", function() {
-var nameEl      = document.getElementById("f-name");
-var initiatorEl = document.getElementById("aw-initiator");
-var doerEl      = document.getElementById("aw-doer");
-var subjectEl   = document.getElementById("aw-subject");
-   
     fetch(NAMES_SCRIPT_URL + "?action=readNames")
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (data.result === "success") {
-if (data.names.length)    populateDropdown(nameEl,      data.names,    "Select");
-if (data.names.length)    populateDropdown(initiatorEl, data.names,    "Select Initiator");
-if (data.names.length)    populateDropdown(doerEl,      data.names,    "Select Doer");
-if (data.subjects.length) populateDropdown(subjectEl,   data.subjects, "Select Subject");
+          if (data.names.length) {
+            populateDropdown(document.getElementById("f-name"),      data.names, "Select");
+            populateDropdown(document.getElementById("aw-initiator"), data.names, "Select Initiator");
+            populateDropdown(document.getElementById("aw-doer"),      data.names, "Select Doer");
+          }
+          if (data.subjects.length) {
+            populateDropdown(document.getElementById("aw-subject"), data.subjects, "Select Subject");
+          }
         }
       })
       .catch(function(err) {
-        console.warn("Could not load dropdowns from Names sheet:", err);
-        // existing hardcoded options remain as fallback
+        console.warn("Could not load dropdowns:", err);
       });
   });
 </script></body>
