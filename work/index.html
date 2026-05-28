@@ -1276,6 +1276,7 @@ function saveEdit(id) {
   // employee's sheet instead of scanning every sheet in both spreadsheets.
   const task = allTasks.find(t => t.id === id);
   if (task && task.doer) params.doer = task.doer;
+  if (task && task.init) params.init = task.init;
   const statusEl = tr.querySelector('[data-field="status"]');
   tr.querySelectorAll('[data-field]').forEach(el => {
     const f = el.getAttribute('data-field');
@@ -1433,7 +1434,7 @@ function loadData(preserve) {
   setRefreshing(true);
   const old = document.getElementById('_jsonp'); if (old) old.remove();
   const cb = 'altusWMD_' + Date.now();
-  const timer = setTimeout(() => { cleanup(cb); showError('Request timed out.'); }, 15000);
+  const timer = setTimeout(() => { cleanup(cb); showError('Request timed out.'); }, 60000);
   window[cb] = function(data) {
     clearTimeout(timer); cleanup(cb); setRefreshing(false);
     if (data.status === 'error') { showError(data.message); return; }
