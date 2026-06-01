@@ -53,3 +53,23 @@
 
   window.Auth = { signIn, sendReset, signOut, guardPage, redirectIfSignedIn, friendlyError };
 })();
+// ================= SIGN OUT BUTTON FIX =================
+document.addEventListener("DOMContentLoaded", function () {
+
+  const signOutBtn = document.getElementById("header-signout-btn");
+
+  if (signOutBtn) {
+    signOutBtn.addEventListener("click", function () {
+
+      firebase.auth().signOut()
+        .then(() => {
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          console.error("Sign out error:", error);
+        });
+
+    });
+  }
+
+});
