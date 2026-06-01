@@ -1,13 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- AUTH GUARD — must be the FIRST thing inside <head> -->
-<style id="auth-guard-hide">html { visibility: hidden; }</style>
+<!-- AUTH GUARD — FIXED -->
+<style id="auth-guard-hide">
+  html { visibility: hidden; }
+</style>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
 <script src="auth-config.js"></script>
 <script src="auth.js"></script>
-<script>window.Auth.guardPage({ redirectTo: 'index.html' });</script>
+
+<script>
+  window.addEventListener("load", function () {
+
+    try {
+      // Run your auth guard
+      if (window.Auth && typeof window.Auth.guardPage === "function") {
+        window.Auth.guardPage({ redirectTo: 'index.html' });
+      }
+    } catch (e) {
+      console.error("Auth guard error:", e);
+    }
+
+    // 🔥 ALWAYS UNHIDE PAGE (CRITICAL FIX)
+    const guardStyle = document.getElementById("auth-guard-hide");
+    if (guardStyle) {
+      guardStyle.remove();
+    }
+
+    document.documentElement.style.visibility = "visible";
+  });
+</script>
 <!-- END AUTH GUARD -->
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
